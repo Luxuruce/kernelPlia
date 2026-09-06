@@ -1,0 +1,254 @@
+clauses:
+- id: ppwr/art/5/4
+  heading: 重金属限制：铅、镉、汞、六价铬浓度之和不超过 100 mg/kg
+  scope: all_packaging
+  effective_expr:
+    kind: point
+    date: '2026-08-12'
+    basis: 第 71 条第二段；FAQ 第 III 章问 12 确认本款自该日适用于全部包装
+  numeric_limits:
+  - name: 铅、镉、汞、六价铬的浓度之和
+    value: 100
+    unit: mg/kg
+    basis: '包装或包装部件中所含物质产生的四项浓度之和。以**包装单元整体**计，含相关的油墨、清漆、
+
+      胶水与粘合剂（FAQ 第 III 章问 17）。FAQ 第 III 章问 14 以「100 ppm（重量）」表述同一限值，
+
+      与 100 mg/kg 等值。
+
+      '
+  src:
+    page_from: 38
+    page_to: 38
+    line_from: 1862
+    line_to: 1865
+  source_id: ppwr_reg
+  text_en: 4. Without prejudice to the restrictions on chemicals set out in Annex XVII to Regulation (EC)
+    No 1907/2006 or, where applicable, to the restrictions and specific measures on food-contact materials
+    and articles in Regulation (EC) No 1935/2004, the sum of the concentrations of lead, cadmium, mercury
+    and hexavalent chromium resulting from substances present in packaging or packaging components shall
+    not exceed 100 mg/kg.
+  status: adopted
+  adopted_by: 演示切片（非真实采纳记录）
+  adopted_at: '2026-09-07'
+- id: ppwr/art/5/5
+  heading: 食品接触包装的 PFAS 限值（引导段）
+  scope: food_contact_only
+  effective_expr:
+    kind: point
+    date: '2026-08-12'
+    basis: 本款明文规定「自 2026 年 8 月 12 日起」，与第 71 条的一般适用日恰好同日，但属条文自设的点状生效日
+  numeric_limits: []
+  src:
+    page_from: 38
+    page_to: 38
+    line_from: 1866
+    line_to: 1869
+  source_id: ppwr_reg
+  text_en: '5. From 12 August 2026, food-contact packaging shall not be placed on the market if it contains
+    per- and polyfluorinated alkyl substances (PFAS) in a concentration equal to or above the following
+    limit values to the extent that the placing on the market of packaging containing such a concentration
+    of PFAS is not prohibited pursuant to another Union legal act:'
+  status: adopted
+  adopted_by: 演示切片（非真实采纳记录）
+  adopted_at: '2026-09-07'
+- id: ppwr/art/29/1
+  source_id: ppwr_reg
+  heading: 运输包装重复使用目标：2030 年 40%
+  scope: transport_only
+  effective_expr:
+    kind: point
+    date: '2030-01-01'
+    basis: 本款明文「自 2030 年 1 月 1 日起」
+  numeric_limits:
+  - name: 可重复使用运输包装占比
+    value: 40
+    unit: '%'
+    basis: 2030-01-01 起，总量口径
+  - name: 可重复使用运输包装占比（努力目标）
+    value: 70
+    unit: '%'
+    basis: 2040-01-01 起，条文为 endeavour，非硬性义务
+  src:
+    page_from: 58
+    page_to: 58
+    line_from: 2756
+    line_to: 2762
+  text_en: 1. From 1 January 2030, economic operators that use transport packaging, or sales packaging
+    used for transporting products, including for products distributed via e-commerce, within the territory
+    of the Union, in the form of pallets, foldable-plastic boxes, boxes, trays, plastic crates, intermediate
+    bulk containers, pails, drums and canisters of any size or material, including flexible formats or
+    pallet wrappings or straps for stabilisation and protection of products put on pallets during transport,
+    shall ensure that at least 40 % of such packaging in total is reusable packaging within a re-use system.
+    From 1 January 2040, those economic operators shall endeavour to use at least 70 % of the packaging
+    referred to in the first subparagraph in a reusable format within a re-use system.
+  status: adopted
+  adopted_by: 演示切片（非真实采纳记录）
+  adopted_at: '2026-09-07'
+- id: ppwr/art/29/2
+  source_id: ppwr_reg
+  heading: 同一经营者场所之间运输：100% 可重复使用
+  scope: transport_only
+  effective_expr:
+    kind: point
+    date: '2030-01-01'
+    basis: 本款明文「自 2030 年 1 月 1 日起」
+  src:
+    page_from: 58
+    page_to: 59
+    line_from: 2763
+    line_to: 2769
+  text_en: 2. From 1 January 2030, by way of derogation from paragraph 1 of this Article, economic operators
+    that use transport packaging or sales packaging used for transporting products, in the forms as listed
+    in paragraph 1 of this Article, within the territory of the Union, between different sites on which
+    the operator performs its activity, or between any of the sites on which the operator performs its
+    activity and the sites of any other linked enterprise or partner enterprise, as defined in Article
+    3 of the Annex to Recommendation 2003/361/EC as applicable on 11 February 2025, shall ensure that
+    such packaging is reusable within a re-use system.
+  status: adopted
+  adopted_by: 演示切片（非真实采纳记录）
+  adopted_at: '2026-09-07'
+- id: ppwr/art/29/3
+  source_id: ppwr_reg
+  heading: 同一成员国内向其他经营者交付：100% 可重复使用
+  scope: transport_only
+  effective_expr:
+    kind: point
+    date: '2030-01-01'
+    basis: 本款明文「自 2030 年 1 月 1 日起」
+  src:
+    page_from: 59
+    page_to: 59
+    line_from: 2770
+    line_to: 2773
+  text_en: 3. From 1 January 2030, by way of derogation from paragraph 1, economic operators that use
+    transport packaging or sales packaging used for transporting products, including for products distributed
+    via e-commerce, in the forms as listed in paragraph 1, to deliver products to another economic operator
+    within the same Member State shall ensure that such packaging is reusable within a re-use system.
+  status: adopted
+  adopted_by: 演示切片（非真实采纳记录）
+  adopted_at: '2026-09-07'
+- id: ppwr/art/29/4
+  source_id: ppwr_reg
+  heading: 第 29(1)(2)(3) 条不适用的四类包装（含纸板箱、危险货物运输包装）
+  scope: transport_only
+  effective_expr:
+    kind: point
+    date: '2026-08-12'
+    basis: 第 71 条第二段；其所减损的第 29(1)(2)(3) 条自 2030-01-01 起适用
+  src:
+    page_from: 59
+    page_to: 59
+    line_from: 2774
+    line_to: 2781
+  text_en: '4. The obligations set out in paragraphs 1, 2 and 3 do not apply to transport packaging or
+    sales packaging: (a) used for the transportation of dangerous goods in accordance with Directive 2008/68/EC;
+    (b) used for the transportation of large-scale machinery, equipment and commodities for which packaging
+    is custom-designed to fit the individual requirements of the economic operator that made the order;
+    (c) in flexible format that is used for transportation and that is in direct contact with food and
+    feed as defined in Article 2 and in Article 3, point (4), of Regulation (EC) No 178/2002 or with food
+    ingredients as defined in Article 2(2), point (f), of Regulation (EU) No 1169/2011 of the European
+    Parliament and of the Council (69); (d) in the form of cardboard boxes.'
+  status: adopted
+  adopted_by: 演示切片（非真实采纳记录）
+  adopted_at: '2026-09-07'
+- id: ppwr/art/70/3
+  source_id: ppwr_reg
+  heading: 两份旧减损决定继续有效
+  scope: all_packaging
+  effective_expr:
+    kind: point
+    date: '2026-08-12'
+    basis: 第 71 条第二段
+  src:
+    page_from: 90
+    page_to: 90
+    line_from: 4072
+    line_to: 4073
+  text_en: 3. Decisions 2001/171/EC and 2009/292/EC shall remain in force and continue to apply until
+    repealed by delegated acts adopted by the Commission pursuant to Article 5(8) of this Regulation.
+  status: adopted
+  adopted_by: 演示切片（非真实采纳记录）
+  adopted_at: '2026-09-07'
+- id: ppwr_guidance/sec/19
+  source_id: ppwr_guidance
+  heading: 指南第 19 节：国际贸易中运输包装的重复使用目标
+  scope: transport_only
+  src:
+    page_from: 26
+    page_to: 27
+    line_from: 1055
+    line_to: 1087
+  text_en: '19. Re-use targets for transport packaging in international trade Legal provisions: Article
+    29: ‘(1) From 1 January 2030, economic operators that use transport packaging, or sales packaging
+    used for transporting products, including for products distributed via e-commerce, within the territory
+    of the Union, in the form of pallets, foldable-plastic boxes, boxes, trays, plastic crates, intermediate
+    bulk containers, pails, drums and canisters of any size or material, including flexible formats or
+    pallet wrappings or straps for stabilisation and protection of products put on pallets during transport,
+    shall ensure that at least 40 % of such packaging in total is reusable packaging within a re-use system.’
+    (2) From 1 January 2030, by way of derogation from paragraph 1 of this Article, economic operators
+    that use transport packaging or sales packaging used for transporting products, in the forms as listed
+    in paragraph 1 of this Article, within the territory of the Union, between different sites on which
+    the operator performs its activity, or between any of the sites on which the operator performs its
+    activity and the sites of any other linked enterprise or partner enterprise, as defined in Article
+    3 of the Annex to Recommendation 2003/361/EC as applicable on 11 February 2025, shall ensure that
+    such packaging is reusable within a re-use system’. (3) From 1 January 2030, by way of derogation
+    from paragraph 1, economic operators that use transport packaging or sales packaging used for transporting
+    products, including for products distributed via e-commerce, in the forms as listed in paragraph 1,
+    to deliver products to another economic operator within the same Member State shall ensure that such
+    packaging is reusable within a re-use system.’ Commission’s interpretation: The re-use targets for
+    transport packaging (and sales packaging used for transporting products) are limited to situations
+    where such packaging is used ‘within the territory of the Union’. Thus, both operators, i.e importers
+    and distributors, must be located in the EU. In relation to transport packaging (and sales packaging
+    used for transporting products) from third countries, this requirement should be understood as applying
+    from the moment of import, and placing on the market, which means that it has completed all required
+    import procedures and is allowed to circulate on the EU market. This typically takes place in the
+    first warehouse in the EU. The re-use targets shall apply to imported goods in transport packaging
+    after they are placed on the EU market. These targets shall apply from the first warehouse located
+    within the Union until the final destination within the Union territory, where the first warehouse
+    is not the final destination of the consignment. For the purpose of this provision, the ‘first warehouse’
+    means the facility within the Union where goods in transport packaging first arrive and are stored
+    and unpacked for the purpose of onward distribution within the EU supply chain. Consignments arriving
+    at the first warehouse and destined for a single final destination shall not be required to be unpacked
+    and repacked into reusable packaging. Distribution centres and logistics hubs shall not be considered
+    as final destination.'
+  status: adopted
+  adopted_by: 演示切片（非真实采纳记录）
+  adopted_at: '2026-09-07'
+- id: ppwr_faq/ch/III/q/17
+  source_id: ppwr_faq
+  heading: FAQ 第 III 章问 17：限制是否及于油墨、清漆、胶水与粘合剂
+  scope: all_packaging
+  src:
+    page_from: 22
+    page_to: 22
+    line_from: 666
+    line_to: 671
+  text_en: 17) Do the restrictions apply only to materials used in packaging manufacturing or also to
+    the materials and the associated inks, varnishes, glues and adhesives? The limits apply to the packaging
+    unit as a whole, including the associated inks, varnishes, glues and adhesives placed on the market
+    by the manufacturer. The latter is the person responsible for drawing the technical documentation
+    needed to prove compliance (for further information, see Commission guidance document).
+  status: adopted
+  adopted_by: 演示切片（非真实采纳记录）
+  adopted_at: '2026-09-07'
+- id: dec_2026_429/art/1
+  source_id: dec_2026_429
+  heading: 托盘缠绕膜与捆扎带豁免第 29(2)(3) 条
+  scope: transport_only
+  effective_expr:
+    kind: point
+    date: '2026-05-26'
+    basis: 第 2 条：刊发后第二十日生效，OJ 刊发日 2026-05-06
+  src:
+    page_from: 1
+    page_to: 1
+    line_from: 38
+    line_to: 40
+    bbox_available: false
+  text_en: Economic operators that use pallet wrappings or straps for stabilisation and protection of
+    products put on pallets during transport are exempted from the 100 % reuse requirements of these packaging
+    formats established in Article 29(2) and (3) of Regulation (EU) 2025/40.
+  status: adopted
+  adopted_by: 演示切片（非真实采纳记录）
+  adopted_at: '2026-09-07'

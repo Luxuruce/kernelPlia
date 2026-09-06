@@ -1,0 +1,30 @@
+cases:
+- id: G01
+  type: 正例
+  q: 包装里重金属最多能有多少？
+  expect_clauses:
+  - ppwr/art/5/4
+  - ppwr/art/70/3
+  - ppwr_faq/ch/III/q/17
+  expect_conflict_ids: []
+  expect_next_action: none
+- id: G02
+  type: 正例
+  q: PFAS 的限值是多少？
+  expect_clauses:
+  - ppwr/art/5/5
+  expect_conflict_ids: []
+  expect_next_action: none
+- id: G13
+  type: 冲突提示
+  q: 托盘缠绕膜要满足重复使用目标吗？
+  expect_clauses:
+  - dec_2026_429/art/1
+  - ppwr/art/29/1
+  - ppwr/art/29/2
+  - ppwr/art/29/3
+  - ppwr/art/29/4
+  - ppwr_guidance/sec/19
+  expect_conflict_ids:
+  - C2_art29_pallet_wrap_exemption
+  expect_next_action: ack_conflict

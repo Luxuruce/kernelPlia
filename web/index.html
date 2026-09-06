@@ -1,0 +1,631 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PPWR 条款级合规问答</title>
+<style>
+  :root{
+    --ink:#05060a; --ink2:#0b0d14; --fg:#eef0f6; --dim:#8a90a6; --line:#1e2230;
+    --a1:#4f8cff; --a2:#a06bff;                 /* 主渐变：蓝 → 紫 */
+    --bind:#3ddc97; --bind-bg:#0e2a20;          /* 位阶 1、2：有法律约束力 */
+    --soft:#e0b355; --soft-bg:#2a2312;          /* 位阶 3、4：委员会解释 */
+    --warn:#ff7a66; --warn-bg:#2b1512;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;background:var(--ink);color:var(--fg);overflow:hidden;
+    font:15px/1.7 -apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif}
+  #bg{position:fixed;inset:0;z-index:0}
+  /* 蒙版只压边缘与文字正后方，中心留给图谱——原来中心就 80% 不透明度，把节点全盖住了 */
+  .veil{position:fixed;inset:0;z-index:1;pointer-events:none;
+    background:
+      radial-gradient(ellipse 34% 30% at 50% 42%,#05060ad9 0%,#05060a99 55%,#05060a00 100%),
+      radial-gradient(ellipse 92% 80% at 50% 45%,#05060a00 40%,#05060acc 88%,#05060a 100%)}
+
+  /* 图谱节点的悬浮提示。z-index 5：压在首屏之上、面板之下 */
+  .tip{position:fixed;z-index:5;pointer-events:none;opacity:0;transition:opacity .12s;
+    padding:8px 12px;border-radius:10px;font-size:13px;line-height:1.5;
+    background:#0d1018f2;border:1px solid #2a3048;backdrop-filter:blur(10px);
+    box-shadow:0 10px 34px #000a;white-space:nowrap}
+  .tip.on{opacity:1}
+  .tip b{font-weight:600}
+  .tip .n{display:block;font-size:11px;color:var(--dim);margin-top:2px}
+  .tip .k{display:block;font-size:11px;color:#6f86c8;margin-top:5px}
+  .tip.bind{border-left:2px solid var(--bind)}
+  .tip.soft{border-left:2px solid var(--soft)}
+
+  /* 标题上方的定位小标（eyebrow）。**放在标题之前，不是放在输入框之前**——
+     副标题到输入框是「承诺 → 动作」的最短路径，中间插一句状态说明会让人多停一拍，
+     而且紧贴输入框会被读成「我们能做的就这些」。放在标题前它是定位，不是限制。 */
+  .kicker{display:inline-flex;align-items:center;gap:8px;margin-bottom:22px;
+    padding:6px 15px 6px 12px;border-radius:999px;font-size:12.5px;color:#a9b4d0;
+    border:1px solid #232a42;background:#0f122099;backdrop-filter:blur(12px);
+    box-shadow:0 6px 22px #0006}
+  .kicker b{color:var(--fg);font-weight:600;letter-spacing:.02em}
+  .kicker i{width:6px;height:6px;border-radius:50%;background:var(--bind);
+    font-style:normal;box-shadow:0 0 0 0 #3fdc9799;animation:live 2.6s infinite}
+  @keyframes live{
+    0%{box-shadow:0 0 0 0 #3fdc9766}
+    70%{box-shadow:0 0 0 7px #3fdc9700}
+    100%{box-shadow:0 0 0 0 #3fdc9700}}
+
+  /* 页脚：回到官方原文。**放在首屏内部**（跟着一起左移、一起缩放），
+     不做成 fixed 条——fixed 会在面板滑出时压在上面，而且它属于这一屏的构图。 */
+  .src{margin-top:30px;display:flex;flex-wrap:wrap;align-items:center;
+    justify-content:center;gap:9px;max-width:760px}
+  .src .lb{width:100%;text-align:center;color:#6b7590;font-size:11.5px;
+    letter-spacing:.06em;margin-bottom:3px}
+  .src a,.src span.s{display:inline-flex;align-items:center;gap:7px;
+    padding:7px 13px;border-radius:9px;font-size:12.5px;text-decoration:none;
+    border:1px solid var(--line);background:#0f122099;color:var(--dim);
+    backdrop-filter:blur(10px);transition:.2s}
+  .src a:hover{color:var(--fg);border-color:#3a4260;background:#151a2ecc}
+  .src span.s{opacity:.62;cursor:default}      /* 库里没有 ELI 的，只给出处不给链接 */
+  /* 高亮的是**法规原文**那一条：四份文件里只有它是位阶 1 的作准正文，
+     其余三份（授权决定、指南、FAQ）都是围着它转的。下载按钮不抢这个位置——
+     用户先要的是「去哪看」，不是「先存一份」。 */
+  .src .hi{color:#fff;border-color:transparent;font-weight:500;
+    background:linear-gradient(92deg,var(--a1),var(--a2));
+    box-shadow:0 6px 22px #4f8cff33}
+  .src .hi:hover{color:#fff;filter:brightness(1.1)}
+  .src .hi .r{background:#fff}
+  .src .r{width:5px;height:5px;border-radius:50%;flex:none}
+  .src .r1{background:var(--bind)}             /* 位阶 1、2 有法律约束力 */
+  .src .r3{background:var(--soft)}             /* 位阶 3、4 委员会解释 */
+
+  /* ── 首屏 ── */
+  .hero{position:fixed;inset:0;z-index:2;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;padding:24px;
+    transition:transform .7s cubic-bezier(.2,.8,.2,1),opacity .5s}
+  /* 提问后**不消失**：整体左移半个面板宽，落到面板旁边那半边继续可用。
+     面板占右侧 min(680px,100vw)，所以左移它的一半，剩余空间的中线正好对上。 */
+  .hero.up{transform:translateX(calc(min(680px,100vw) / -2)) scale(.84)}
+  /* 窄屏面板会盖满整幅，并排放不下——退回原来的淡出 */
+  @media (max-width:999px){
+    .hero.up{transform:translateY(-32vh) scale(.86);opacity:0;pointer-events:none}
+  }
+  .brand{position:fixed;top:22px;left:26px;z-index:4;font-size:13.5px;letter-spacing:.04em;color:var(--dim)}
+  .brand b{color:var(--fg);font-weight:600}
+  h1{margin:0;text-align:center;font-size:clamp(30px,5.6vw,62px);line-height:1.18;
+    font-weight:700;letter-spacing:-.01em}
+  h1 .g{background:linear-gradient(92deg,var(--a1),var(--a2));
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  .sub{margin:20px 0 34px;color:var(--dim);text-align:center;font-size:15.5px;max-width:640px}
+  .stats{display:flex;gap:38px;margin-top:38px;color:var(--dim);font-size:12.5px;text-align:center}
+  .stats b{display:block;font-size:23px;color:var(--fg);font-weight:600;
+    font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+
+  /* ── 输入框 ── */
+  .ask{width:min(680px,92vw);position:relative}
+  .ask input{width:100%;padding:17px 118px 17px 20px;font:inherit;color:var(--fg);
+    background:#0f1220cc;backdrop-filter:blur(14px);
+    border:1px solid #2a3048;border-radius:15px;outline:none;
+    box-shadow:0 12px 44px #0009,inset 0 1px 0 #ffffff0d;transition:border-color .25s,box-shadow .25s}
+  .ask input:focus{border-color:#4f6bff88;box-shadow:0 12px 52px #0009,0 0 0 4px #4f8cff1f}
+  .ask button{position:absolute;right:7px;top:7px;bottom:7px;padding:0 20px;
+    border:0;border-radius:11px;color:#fff;font:inherit;font-weight:500;cursor:pointer;
+    background:linear-gradient(92deg,var(--a1),var(--a2))}
+  .ask button:disabled{opacity:.4;cursor:default}
+  .chips{margin-top:14px;display:flex;gap:9px;flex-wrap:wrap;justify-content:center}
+  .chip{padding:6px 13px;border:1px solid var(--line);border-radius:999px;
+    color:var(--dim);font-size:12.5px;cursor:pointer;background:#0f122099;transition:.2s}
+  .chip:hover{color:var(--fg);border-color:#3a4260}
+
+  /* ── 提问后：输入框落到底部 ── */
+  .dock{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(140%);
+    z-index:5;transition:transform .6s cubic-bezier(.2,.8,.2,1)}
+  .dock.on{transform:translateX(-50%) translateY(0)}
+
+  /* ── 右侧滑出面板 ── */
+  .panel{position:fixed;top:0;right:0;bottom:0;width:min(680px,100vw);z-index:6;
+    background:#080a12f2;backdrop-filter:blur(20px);border-left:1px solid var(--line);
+    transform:translateX(102%);transition:transform .55s cubic-bezier(.2,.8,.2,1);
+    display:flex;flex-direction:column;box-shadow:-30px 0 70px #000a}
+  .panel.on{transform:none;box-shadow:-30px 0 70px #000a}
+  /* 第二层压在第一层左边。**隐藏时要移出自身宽度 + 那个 right 偏移**——
+     只移 102% 的话右边会露出一截，看起来像一块无缘无故的遮罩。 */
+  .panel.two{right:min(680px,100vw);width:min(760px,100vw);z-index:7;
+    transform:translateX(calc(100% + min(680px,100vw) + 40px));box-shadow:none}
+  /* 显式写 transform：`.panel.two` 与 `.panel.on` 特指度相同、且写在后面，
+     不在这里覆盖的话「打开」会被隐藏位移压回去。 */
+  .panel.two.on{transform:none;box-shadow:-30px 0 70px #000c}
+  /* 从图谱直接点开条款时第一层是空的，第二层就占满右侧，
+     不然右边会空出 680px 一条缝。 */
+  .panel.two.solo{right:0;width:min(680px,100vw);transform:translateX(102%)}
+  .panel.two.solo.on{transform:none}
+  .p-h{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;
+    padding:18px 22px;border-bottom:1px solid var(--line)}
+  .p-h h2{margin:0;font-size:15px;font-weight:600}
+  .p-h .x{background:none;border:1px solid var(--line);color:var(--dim);
+    border-radius:9px;padding:5px 11px;cursor:pointer;font:inherit;font-size:12.5px}
+  .p-b{flex:1;overflow:auto;padding:20px 22px 34px}
+  .p-b::-webkit-scrollbar{width:9px}
+  .p-b::-webkit-scrollbar-thumb{background:#1e2230;border-radius:9px}
+
+  /* ── 检索管线：等待期间的演出 ── */
+  .pipe{margin-bottom:22px}
+  .step{display:flex;gap:11px;align-items:flex-start;padding:7px 0;opacity:.28;
+    transition:opacity .4s;font-size:13.5px}
+  .step.on{opacity:1}
+  .dot{width:7px;height:7px;border-radius:50%;background:#39405c;margin-top:8px;flex:none;
+    transition:.4s}
+  .step.on .dot{background:var(--a1);box-shadow:0 0 0 4px #4f8cff22}
+  .step.busy .dot{animation:pulse 1.1s ease-in-out infinite}
+  @keyframes pulse{50%{box-shadow:0 0 0 9px #4f8cff00}}
+  .step .k{color:var(--dim)}
+  .step .v{color:var(--fg)}
+
+  h3{font-size:11.5px;font-weight:600;color:var(--dim);margin:24px 0 10px;
+    letter-spacing:.1em;text-transform:uppercase}
+  .answer{white-space:pre-wrap;word-break:break-word;font-size:14.5px;line-height:1.85}
+  .answer strong,.cf strong{font-weight:600;color:#fff}
+  .answer code,.cf code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.92em;
+    background:#ffffff12;padding:1px 5px;border-radius:4px}
+  /* 位阶分组：红线第 10 条——rank 3/4 必须与 1/2 视觉区分，且不得排成同一个无序列表 */
+  .grp{margin-bottom:15px}
+  .grp-h{display:inline-block;font-size:11.5px;font-weight:600;margin-bottom:8px;
+    padding:3px 10px;border-radius:5px}
+  .grp.bind .grp-h{color:var(--bind);background:var(--bind-bg)}
+  .grp.soft .grp-h{color:var(--soft);background:var(--soft-bg)}
+  .cite{display:block;width:100%;text-align:left;padding:11px 14px;margin-bottom:7px;
+    border:1px solid var(--line);border-radius:11px;background:#0d1018;color:var(--fg);
+    font:inherit;cursor:pointer;transition:.2s;opacity:0;transform:translateY(6px);
+    animation:in .45s forwards}
+  @keyframes in{to{opacity:1;transform:none}}
+  .cite:hover{border-color:#3a4260;background:#111522}
+  .grp.bind .cite{border-left:2px solid var(--bind)}
+  .grp.soft .cite{border-left:2px solid var(--soft)}
+  .cite .n{display:block;font-size:11.5px;color:var(--dim);margin-top:3px}
+  /* 冲突：不得折叠、不得置于「展开更多」之后（免责文案 5.2） */
+  .cf{border:1px solid #5a2b22;background:var(--warn-bg);border-radius:12px;
+    padding:16px 18px;margin-bottom:14px}
+  .cf h4{margin:0 0 9px;font-size:14px;color:var(--warn)}
+  .cf dt{font-weight:600;color:var(--warn);margin-top:9px;font-size:12.5px}
+  .cf dd{margin:2px 0 0;white-space:pre-wrap;font-size:13.5px}
+  .ackbtn{margin-top:13px;padding:10px 20px;border:0;border-radius:10px;color:#fff;
+    font:inherit;cursor:pointer;background:linear-gradient(92deg,var(--a1),var(--a2))}
+  .zh{font-size:13.5px;background:#0d1018;border:1px solid var(--line);
+    padding:13px 15px;border-radius:11px;white-space:pre-wrap}
+  .lang{font-size:11.5px;color:var(--dim);margin:6px 0 16px}
+  .pg{position:relative;margin-bottom:12px;line-height:0;border-radius:8px;overflow:hidden}
+  .pg img{width:100%;display:block}
+  /* 只留底色不描边：逐行的框描了边会切成一条条，像马克笔划过去才连贯。
+     边框原来也在承担可见度，去掉后底色要相应加浓。 */
+  .box{position:absolute;background:#ff7a6640;
+    border-radius:2px;pointer-events:none;animation:in .5s .25s backwards}
+  .foot{border-top:1px solid var(--line);margin-top:26px;padding-top:15px;
+    font-size:11.5px;color:var(--dim);line-height:1.7}
+</style>
+
+<canvas id="bg"></canvas><div class="veil"></div>
+<div class="brand"><b>让跨境出口合规不再是黑箱</b> · LenoraL</div>
+
+<div class="hero" id="hero">
+  <div class="kicker"><i></i>当前已上线法规　<b>PPWR</b>　欧盟包装法案</div>
+  <h1>把法规问答<br><span class="g">钉在条款上</span></h1>
+  <p class="sub">每一条结论都回链到条、款、项，点开就看原文件和法条所在位置。</p>
+  <div class="ask">
+    <input id="q" autocomplete="off" placeholder="直接问，例如：包装的重金属限值是多少？">
+    <button id="go">提问</button>
+  </div>
+  <div class="chips">
+    <span class="chip">包装里重金属最多能有多少？</span>
+    <span class="chip">PFAS 的限值是多少？</span>
+    <span class="chip">PPWR 什么时候开始管？</span>
+  </div>
+  <div class="src" id="src"></div>
+  <div class="stats">
+    <div><b id="s1">—</b>条款单元</div>
+    <div><b id="s2">—</b>条关系链接</div>
+    <div><b id="s3">—</b>页原文可回溯</div>
+  </div>
+</div>
+
+<div class="dock" id="dock">
+  <div class="ask" style="width:min(560px,92vw)">
+    <input id="q2" autocomplete="off" placeholder="再问一个…">
+    <button id="go2">提问</button>
+  </div>
+</div>
+
+<div class="tip" id="tip"></div>
+
+<div class="panel" id="p1">
+  <div class="p-h"><h2 id="p1t">回答</h2><button class="x" onclick="closeAll()">关闭</button></div>
+  <div class="p-b" id="p1b"></div>
+</div>
+<div class="panel two" id="p2">
+  <div class="p-h"><div><h2 id="p2t"></h2><div class="lang" id="p2s" style="margin:4px 0 0"></div></div>
+    <button class="x" onclick="p2.classList.remove('on')">关闭</button></div>
+  <div class="p-b" id="p2b"></div>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const SID = 'web-' + Math.random().toString(36).slice(2, 10);
+const esc = s => (s ?? '').replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+// 冲突文案（conflicts.yaml）与模型答案里带 **强调** 和 `条文原词`，那是作者真实的语义标记，
+// 不该当噪声洗掉、也不该原样印出来。**必须先 esc 再解析**——反过来就是注入。
+// 只认这两种、且不跨行，剩下的 Markdown 一概不动。
+const md = s => esc(s)
+  .replace(/\*\*([^*\n]+?)\*\*/g, '<strong>$1</strong>')
+  .replace(/`([^`\n]+?)`/g, '<code>$1</code>');
+let acked = [], busy = false;
+
+/* ── 背景：真实的条款关系图谱 ─────────────────────────────────────────
+   节点是已采纳的条款单元、边是 clause_link 的真实关系。
+   接口是匿名化的（只给位阶与拓扑，不给条款号），所以画得出形状、泄露不了索引。 */
+const cv = $('#bg'), cx = cv.getContext('2d');
+let N = [], E = [], W = 0, H = 0;
+const RANK_C = {1:[63,220,151], 2:[63,220,151], 3:[224,179,85], 4:[224,179,85]};
+
+function resize(){ W = cv.width = innerWidth * devicePixelRatio;
+  H = cv.height = innerHeight * devicePixelRatio;
+  cv.style.width = innerWidth + 'px'; cv.style.height = innerHeight + 'px'; }
+addEventListener('resize', resize); resize();
+
+let ADJ = [], PULSE = [], LB = null, HOVER = -1;
+// 按会话解锁（该项裁决）：节点默认匿名、暗态；**在本会话的回答里作为引用出现过之后**
+// 才拿到名字、才可悬浮可点击。所以每答完一轮要回来重取一次 labels。
+async function relight(){
+  const g = await (await fetch(`/api/graph?session_id=${SID}`)).json();
+  LB = g.labels || null;
+}
+fetch(`/api/graph?session_id=${SID}`).then(r => r.json()).then(g => {
+  N = g.ranks.map((rank, i) => {
+    const a = i * 2.399963;                       // 黄金角，铺得均匀不成环
+    const r = Math.sqrt(i / g.ranks.length);
+    return {rank, ang: a, rad: r,
+            // 位移周期 ~20 秒：2π/.31 ≈ 20s，各点略有差异才不像整体在晃
+            ph: Math.random() * 6.28, sp: .29 + Math.random() * .05,
+            sz: rank <= 2 ? 2.6 : 1.7, flash: 0};
+  });
+  E = g.edges;
+  LB = g.labels || null;                          // 没开 GRAPH_LABELS 就是 null，全程降级为纯背景
+  // 邻接表：脉冲沿边传播要用它一跳一跳往下走
+  ADJ = N.map(() => []);
+  E.forEach(([a, b], i) => { ADJ[a]?.push([i, b]); ADJ[b]?.push([i, a]); });
+  $('#s1').textContent = g.ranks.length;
+  $('#s2').textContent = g.edges.length;
+  $('#s3').textContent = 232;
+  setInterval(spawn, 1000);
+  draw();
+});
+
+// 从一个随机节点点火，让脉冲沿它的边跑出去。
+// 这不是随便找的动效——**它就是一跳链接扩展的样子**：
+// 命中一条条款，顺着 derogates / explains 把该带的带出来。
+function spawn(){
+  if (!E.length || PULSE.length > 8) return;          // 同时最多 8 条，多了就乱
+  const e = Math.floor(Math.random() * E.length);
+  PULSE.push({e, dir: Math.random() < .5 ? 0 : 1, t: 0,
+              sp: .10 + Math.random() * .08, hop: 0});  // 一条边走约 6–10 秒
+
+}
+
+let t = 0, last = performance.now(), mx = 0, my = 0, tmx = 0, tmy = 0, HOVER_PREV = -1;
+let px = -9999, py = -9999, tpx = -9999, tpy = -9999;
+let OVER_UI = false;
+addEventListener('pointermove', e => {
+  tmx = (e.clientX / innerWidth - .5); tmy = (e.clientY / innerHeight - .5);
+  tpx = e.clientX * devicePixelRatio; tpy = e.clientY * devicePixelRatio;
+  // 指针压在面板/输入框上时不做节点命中——底下的图谱被挡着，提示会浮到面板上面
+  OVER_UI = !!e.target.closest('.panel,.dock,.ask,.chip');
+});
+addEventListener('pointerleave', () => { tpx = tpy = -9999; });
+
+function draw(){
+  const now = performance.now(), dt = Math.min(.05, (now - last) / 1000); last = now;
+  t += dt;
+  mx += (tmx - mx) * .05; my += (tmy - my) * .05;      // 指针视差，缓动跟随
+  if (tpx < -9000) { px = py = -9999; }
+  else { px += (tpx - px > 5000 ? tpx - px : (tpx - px) * .12); py += (tpy - py > 5000 ? tpy - py : (tpy - py) * .12); }
+  const GLOW = 210 * devicePixelRatio;                 // 光晕半径
+
+  cx.clearRect(0, 0, W, H);
+
+  // 整体极慢自转 + 每个节点各自的呼吸位移。
+  // 自转让画面**任何时刻都在动**，位移让它不像一张旋转的贴图。
+  const rot = t * (6.2832 / 480);                     // 一圈 8 分钟
+  const P = N.map(n => {
+    const a = n.ang + rot, r = n.rad;
+    const wob = .045;                                   // 位移振幅，原来只有 .018，看不出来
+    return {
+      x: (.5 + Math.cos(a) * r * .62 + Math.sin(t * n.sp + n.ph) * wob + mx * .16 * (.25 + r)) * W,
+      y: (.5 + Math.sin(a) * r * .58 + Math.cos(t * n.sp * .8 + n.ph) * wob + my * .16 * (.25 + r)) * H,
+      n};
+  });
+
+  // 叠加混合：线与点互相加亮，交叉密集处自然发光
+  cx.globalCompositeOperation = 'lighter';
+
+  // 光标柔光。**近处的边与节点跟着变亮**——只画一团光而周围毫无反应，
+  // 看起来像贴了张图；让图谱本身响应，才有「摸得到」的感觉。
+  const near = (x, y) => {
+    if (px < -9000) return 0;
+    const d = Math.hypot(x - px, y - py);
+    return d > GLOW ? 0 : (1 - d / GLOW) ** 2;
+  };
+  // 点到线段的距离。光标多半落在**两点之间的空处**，只按端点算的话
+  // 从光标底下穿过去的那些线一条都不会亮——那正是「看不出区别」的原因。
+  const nearSeg = (ax, ay, bx, by) => {
+    if (px < -9000) return 0;
+    const dx = bx - ax, dy = by - ay, L2 = dx * dx + dy * dy || 1;
+    let u = ((px - ax) * dx + (py - ay) * dy) / L2;
+    u = u < 0 ? 0 : u > 1 ? 1 : u;
+    const d = Math.hypot(ax + dx * u - px, ay + dy * u - py);
+    return d > GLOW ? 0 : (1 - d / GLOW) ** 2;
+  };
+  if (px > -9000) {
+    const g = cx.createRadialGradient(px, py, 0, px, py, GLOW);
+    g.addColorStop(0, 'rgba(95,150,255,.30)');
+    g.addColorStop(.42, 'rgba(115,120,255,.13)');
+    g.addColorStop(1, 'rgba(90,140,255,0)');
+    cx.fillStyle = g;
+    cx.beginPath(); cx.arc(px, py, GLOW, 0, 6.29); cx.fill();
+    // 一圈极淡的边界：给「照亮的范围」一个可读的边，不然只是块模糊的亮斑
+    cx.strokeStyle = 'rgba(120,165,255,.10)';
+    cx.lineWidth = 1 * devicePixelRatio;
+    cx.beginPath(); cx.arc(px, py, GLOW * .82, 0, 6.29); cx.stroke();
+  }
+
+  cx.lineWidth = 1.1 * devicePixelRatio;
+  const LIT = [];                                      // 光标半径内的边，下面再加亮一遍
+  for (const [a, b] of E) {
+    if (!P[a] || !P[b]) continue;
+    const lit = nearSeg(P[a].x, P[a].y, P[b].x, P[b].y);
+    if (lit > .01) LIT.push([P[a], P[b]]);
+    const g = cx.createLinearGradient(P[a].x, P[a].y, P[b].x, P[b].y);
+    g.addColorStop(0, `rgba(79,140,255,${.42 + lit * .45})`);
+    g.addColorStop(1, `rgba(160,107,255,${.42 + lit * .45})`);
+    cx.strokeStyle = g;
+    cx.lineWidth = (1.1 + lit * 1.1) * devicePixelRatio;
+    cx.beginPath(); cx.moveTo(P[a].x, P[a].y); cx.lineTo(P[b].x, P[b].y); cx.stroke();
+  }
+  // 透镜：把落在光标圈里的**那一段线**再描一遍，三层同心、越靠中心越亮。
+  // 用 clip 而不是整条线加亮，亮的才是光标底下那一小段，边界感就出来了。
+  if (px > -9000 && LIT.length) {
+    for (const [rf, al, lw] of [[1, .13, .4], [.66, .17, .8], [.34, .22, 1.3]]) {
+      cx.save();
+      cx.beginPath(); cx.arc(px, py, GLOW * rf, 0, 6.29); cx.clip();
+      cx.strokeStyle = `rgba(150,190,255,${al})`;
+      cx.lineWidth = (1.1 + lw) * devicePixelRatio;
+      cx.beginPath();
+      for (const [A, B] of LIT) { cx.moveTo(A.x, A.y); cx.lineTo(B.x, B.y); }
+      cx.stroke();
+      cx.restore();
+    }
+  }
+  // 沿边跑的脉冲。跑到端点就闪一下那个节点，并有机会继续往下一跳——
+  // 最多三跳，正好对应「一跳扩展」的量级，不至于满屏乱窜。
+  for (let i = PULSE.length - 1; i >= 0; i--) {
+    const pu = PULSE[i];
+    pu.t += dt * pu.sp;
+    const [ea, eb] = E[pu.e];
+    const A = P[pu.dir ? eb : ea], B = P[pu.dir ? ea : eb];
+    if (!A || !B) { PULSE.splice(i, 1); continue; }
+    if (pu.t >= 1) {
+      B.n.flash = 1;
+      PULSE.splice(i, 1);
+      const nb = ADJ[pu.dir ? ea : eb];
+      if (pu.hop < 2 && nb?.length) {
+        const [ne, nn] = nb[Math.floor(Math.random() * nb.length)];
+        PULSE.push({e: ne, dir: E[ne][0] === (pu.dir ? ea : eb) ? 0 : 1,
+                    t: 0, sp: pu.sp, hop: pu.hop + 1});
+      }
+      continue;
+    }
+    const ease = pu.t * pu.t * (3 - 2 * pu.t);
+    const x = A.x + (B.x - A.x) * ease, y = A.y + (B.y - A.y) * ease;
+    const tail = cx.createRadialGradient(x, y, 0, x, y, 26 * devicePixelRatio);
+    const fade = Math.sin(pu.t * Math.PI);
+    tail.addColorStop(0, `rgba(150,190,255,${.55 * fade})`);
+    tail.addColorStop(1, 'rgba(150,190,255,0)');
+    cx.fillStyle = tail;
+    cx.beginPath(); cx.arc(x, y, 26 * devicePixelRatio, 0, 6.29); cx.fill();
+    cx.fillStyle = `rgba(215,230,255,${.9 * fade})`;
+    cx.beginPath(); cx.arc(x, y, 1.7 * devicePixelRatio, 0, 6.29); cx.fill();
+  }
+
+  // 命中检测：用未缓动的真实指针位置，缓动值会让点选慢半拍。
+  // 只有拿到 labels 才可点——没有名字的节点点开也没东西可看。
+  HOVER = -1;
+  if (LB && tpx > -9000 && !OVER_UI) {
+    const HIT = 22 * devicePixelRatio;
+    let best = HIT * HIT;
+    for (let i = 0; i < P.length; i++) {
+      if (!LB[i]) continue;                       // 还没点亮的节点不响应
+      const dx = P[i].x - tpx, dy = P[i].y - tpy, d2 = dx * dx + dy * dy;
+      if (d2 < best) { best = d2; HOVER = i; }
+    }
+  }
+  if (HOVER !== HOVER_PREV) {
+    HOVER_PREV = HOVER;
+    const L = HOVER >= 0 ? LB[HOVER] : null;
+    tip.className = 'tip' + (L ? ' on ' + (LB[HOVER].note?.startsWith('有法律') ? 'bind' : 'soft') : '');
+    if (L) tip.innerHTML = `<b>${esc(L.display)}</b><span class="n">${esc(L.note)}</span>`
+                         + '<span class="k">点击查看原文页与高亮位置</span>';
+    document.body.style.cursor = L ? 'pointer' : '';
+  }
+  if (HOVER >= 0) {
+    const cxp = tpx / devicePixelRatio, cyp = tpy / devicePixelRatio;
+    tip.style.left = Math.min(cxp + 16, innerWidth - tip.offsetWidth - 12) + 'px';
+    tip.style.top  = Math.min(cyp + 15, innerHeight - tip.offsetHeight - 12) + 'px';
+  }
+
+  for (let pi = 0; pi < P.length; pi++) {
+    const p = P[pi];
+    const c = RANK_C[p.n.rank];
+    // 已点亮的节点更亮更大一圈。**未点亮不是灰的**——同色，只是暗，
+    // 它讲的是「还没问到」，不是「不支持」（产品契约文档 第五节 该项裁决）。
+    const on = !!(LB && LB[pi]);
+    p.n.flash = Math.max(0, p.n.flash - dt * 1.5);      // 被脉冲点亮后慢慢褪回去
+    const lit = near(p.x, p.y);
+    const pulse = .5 + .5 * Math.sin(t * 2.2 + p.n.ph) + p.n.flash * 1.6 + lit * 1.8
+                + (on ? 1.1 : 0);
+    // lit 单列在封顶之外：呼吸本身就能把 pulse 顶到上限，
+    // 一起封顶的话「靠近光标」这件事在半径上完全体现不出来。
+    const r = p.n.sz * devicePixelRatio * (1 + Math.min(pulse, 2) * .4 + lit * 1.1
+                                           + (on ? .55 : 0));
+    // 外晕：让节点在黑底上真的“亮”起来，而不是几个灰点
+    const halo = cx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r * 6);
+    halo.addColorStop(0, `rgba(${c[0]},${c[1]},${c[2]},${.30 + pulse * .22})`);
+    halo.addColorStop(1, `rgba(${c[0]},${c[1]},${c[2]},0)`);
+    cx.fillStyle = halo;
+    cx.beginPath(); cx.arc(p.x, p.y, r * 6, 0, 6.29); cx.fill();
+    cx.fillStyle = `rgba(${c[0]},${c[1]},${c[2]},${.55 + pulse * .35})`;
+    cx.beginPath(); cx.arc(p.x, p.y, r, 0, 6.29); cx.fill();
+    // 选中环：告诉用户「点的就是这一个」，光晕本身指不到具体某个点
+    if (pi === HOVER) {
+      cx.strokeStyle = `rgba(${c[0]},${c[1]},${c[2]},.85)`;
+      cx.lineWidth = 1.4 * devicePixelRatio;
+      cx.beginPath(); cx.arc(p.x, p.y, r + 8 * devicePixelRatio, 0, 6.29); cx.stroke();
+    }
+  }
+  cx.globalCompositeOperation = 'source-over';
+  requestAnimationFrame(draw);
+}
+
+/* ── 渲染 ───────────────────────────────────────────────────────── */
+function citations(list){
+  if (!list?.length) return '';
+  const g = (items, cls, title) => items.length ? `<div class="grp ${cls}">
+    <div class="grp-h">${title}</div>${items.map((c, i) =>
+      `<button class="cite" data-id="${esc(c.clause_id)}" style="animation-delay:${i * .045}s">
+        ${esc(c.display)}<span class="n">${esc(c.authority_note)}</span></button>`).join('')}</div>` : '';
+  return g(list.filter(c => c.authority_rank <= 2), 'bind', '有法律约束力')
+       + g(list.filter(c => c.authority_rank >= 3), 'soft', '委员会解释 · 无法律约束力');
+}
+function conflicts(list){
+  return (list || []).map(c => `<div class="cf">
+    <h4>${c.mode === 'blocking' ? '先说明一处不一致，再回答你的问题'
+                                : '本回答涉及一处官方文件间的不一致'}</h4>
+    <div>${md(c.summary_zh)}</div>
+    <dl><dt>位阶指向</dt><dd>${md(c.resolution_zh)}</dd>
+        <dt>依据</dt><dd>${md(c.authority_basis)}</dd></dl></div>`).join('');
+}
+const STEPS = ['条款号精确定位', '主题词召回', '一跳链接扩展', '冲突判定', '答案合成与六条校验'];
+const pipe = (upto, detail = {}) => `<div class="pipe">${STEPS.map((s, i) => `
+  <div class="step ${i < upto ? 'on' : ''} ${i === upto - 1 ? 'busy' : ''}">
+    <div class="dot"></div><div><span class="k">${s}</span>
+    ${detail[i] ? ` <span class="v">· ${esc(detail[i])}</span>` : ''}</div></div>`).join('')}</div>`;
+
+function closeAll(){ p1.classList.remove('on'); p2.classList.remove('on');
+  hero.classList.remove('up'); dock.classList.remove('on'); }
+
+/* ── 问答 ───────────────────────────────────────────────────────── */
+async function submit(question){
+  if (busy || !question) return;
+  busy = true; acked = [];
+  $('#go').disabled = $('#go2').disabled = true;
+  // 宽屏首屏留着不走，底部那个「再问一个」就多余了；窄屏首屏淡出，才需要它
+  hero.classList.add('up'); dock.classList.toggle('on', innerWidth < 1000);
+  p2.classList.remove('on');
+  p1.classList.add('on'); $('#p1t').textContent = question;
+
+  const t0 = performance.now();
+  $('#p1b').innerHTML = pipe(1);
+  const s1 = await (await fetch('/api/ask/clauses', {method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({question, session_id: SID})})).json();
+  const ms = Math.round(performance.now() - t0);
+
+  const d1 = {0:'已解析', 1:`${s1.citations.length} 条候选`, 2:'已带出关联条款',
+              3: s1.will_block ? '命中已知冲突' : '未触发'};
+  $('#p1b').innerHTML = pipe(5, d1) +
+    `<h3>检索到的依据 · ${ms} ms</h3>${citations(s1.citations)}`;
+
+  await round(question, d1, ms);
+  await relight();                     // 这轮引用过的条款，在图谱上亮起来
+  busy = false; $('#go').disabled = $('#go2').disabled = false;
+  $('#q').value = '';                        // 问题已经挂在面板标题上，输入框清空好接着问
+}
+
+async function round(question, d1, ms){
+  const d = await (await fetch('/api/ask', {method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({question, session_id: SID, acked_conflict_ids: acked})})).json();
+
+  const foot = `<div class="foot">${esc(d.disclaimer)}<br><br>依据语料版本 ${esc(d.corpus_version)}</div>`;
+
+  // 阻断态：不出答案正文，等用户确认知悉（决策 #5：暴露并阻断，不自动择一）
+  if (d.next_action === 'ack_conflict') {
+    $('#p1b').innerHTML = pipe(4, {...d1, 3:'命中，已拦下'}) +
+      `<h3>需要先知悉</h3>${conflicts(d.conflicts)}
+       <div style="color:var(--dim);font-size:13.5px">这不是系统出错，也不是我们替你做了判断——冲突本身就是你需要知道的信息。</div>
+       <button class="ackbtn" id="ack">知道了，继续</button>` + foot;
+    $('#ack').onclick = e => {
+      acked = d.conflicts.map(c => c.conflict_id);
+      e.target.disabled = true; e.target.textContent = '正在作答…';
+      round(question, d1, ms);
+    };
+    return;
+  }
+
+  $('#p1b').innerHTML = pipe(5, d1) +
+    (d.conflicts?.length ? `<h3>官方文件间的不一致</h3>${conflicts(d.conflicts)}` : '') +
+    `<h3>回答</h3><div class="answer">${md(d.answer_zh) || '（无正文）'}</div>` +
+    (d.citations?.length ? `<h3>依据 · 点开看原文</h3>${citations(d.citations)}` : '') + foot;
+}
+
+/* ── 引用回溯：第二层面板 ───────────────────────────────────────── */
+document.addEventListener('click', async e => {
+  const chip = e.target.closest('.chip');
+  if (chip) { $('#q').value = chip.textContent; submit(chip.textContent); return; }
+  const b = e.target.closest('.cite');
+  if (b) return openClause(b.dataset.id);
+  // 图谱节点：命中环上那一个就打开它。避开输入框、按钮、面板等要自己响应点击的地方。
+  if (HOVER >= 0 && LB && !e.target.closest('input,button,.panel,.dock,.ask'))
+    return openClause(LB[HOVER].id);
+});
+
+async function openClause(id){
+  p2.classList.toggle('solo', !p1.classList.contains('on'));
+  p2.classList.add('on'); $('#p2b').innerHTML = '<div class="lang">载入原文…</div>';
+  const d = await (await fetch(`/api/clause/${id}?session_id=${SID}`)).json();
+  $('#p2t').textContent = d.display;
+  $('#p2s').textContent = `第 ${d.page_from}${d.page_to !== d.page_from ? '–' + d.page_to : ''} 页 · ${d.authority_note}`;
+
+  const boxes = p => (d.bbox || []).filter(x => x.page === p).map(x =>
+    `<div class="box" style="left:${x.x0*100}%;top:${x.y0*100}%;
+      width:${(x.x1-x.x0)*100}%;height:${(x.y1-x.y0)*100}%"></div>`).join('');
+  // 只给中译 + 原文页图。页图本身就是作准的英文原件，不再贴一遍纯文本；
+  // **没有页图时退回文本**，否则作准文本一处都不剩（红线第 11 条）。
+  const hasPage = d.page_image_urls.length > 0;
+  $('#p2b').innerHTML =
+    (d.text_zh ? `<div class="zh">${esc(d.text_zh)}</div>
+      <div class="lang">经审查的工作译本 · 无法律效力，以英文原文为准</div>` : '') +
+    (hasPage ? '' : `<div class="zh">${esc(d.text_en) || '（本条为署名断言，官方文件未覆盖，无作准文本）'}</div>`) +
+    (d.page_image_urls.map((u, i) =>
+      `<div class="pg"><img src="${u}" loading="lazy">${boxes(d.page_from + i)}</div>`).join('')
+      || '<div class="lang">该来源无页图边车，只能给页码</div>');
+}
+
+/* ── 页脚：本内核依据的官方文件 ─────────────────────────────────────
+   **链接指向 EUR-Lex，不发我们自己的副本**：`knowledge/ppwr/EUoffical/` 那几份是
+   冻结基线，行号被条款单元锚着、不跟勘误走；而免责文案要求「以英文原文为准」。
+   发一份可能落后于勘误的件给用户当作准，正是那条纪律要防的事。 */
+fetch('/api/sources').then(r => r.json()).then(d => {
+  const short = {ppwr_reg:'PPWR 法规原文', dec_2026_429:'授权决定 2026/429',
+                 ppwr_guidance:'官方实施指南', ppwr_faq:'官方 FAQ（第二版）'};
+  $('#src').innerHTML = '<div class="lb">本内核依据的官方文件 · 以英文原文为准</div>'
+    + d.sources.map(s => {
+        const dot = `<i class="r r${s.authority_rank <= 2 ? 1 : 3}"></i>`;
+        const name = esc(short[s.id] || s.id);
+        const tip = esc(`${s.title}　|　${s.oj_ref}　|　${s.authority_note}`);
+        // 位阶 1 的作准正文单独高亮——四份里只有它是法律本身
+        const hi = s.authority_rank === 1 ? ' class="hi"' : '';
+        return s.url
+          ? `<a${hi} href="${esc(s.url)}" target="_blank" rel="noopener" title="${tip}">${dot}${name} ↗</a>`
+          : `<span class="s" title="${tip}">${dot}${name}　${esc(s.oj_ref)}</span>`;
+      }).join('')
+    + (d.sources.find(s => s.pdf_url)
+        ? `<a href="${esc(d.sources.find(s => s.pdf_url).pdf_url)}"
+             target="_blank" rel="noopener">下载法规原文 PDF（EUR-Lex 官方件）</a>` : '');
+});
+
+$('#go').onclick = () => submit($('#q').value.trim());
+$('#q').onkeydown = e => e.key === 'Enter' && submit($('#q').value.trim());
+$('#go2').onclick = () => { submit($('#q2').value.trim()); $('#q2').value = ''; };
+$('#q2').onkeydown = e => { if (e.key === 'Enter') { submit($('#q2').value.trim()); $('#q2').value = ''; } };
+addEventListener('keydown', e => e.key === 'Escape' && closeAll());
+</script>

@@ -1,0 +1,28 @@
+# 合规内核 V0 · 本地开发依赖
+#
+# 只有一个服务：PostgreSQL。
+# 交接包 第一节贯穿原则：能少一个组件就少一个——不上向量库、不上 Redis、不上消息队列。
+# 往这个文件里加服务属于「新增服务组件」，须回产品审核（产研交接 第 5 节）。
+
+services:
+  db:
+    image: postgres:16
+    container_name: kernel-db
+    environment:
+      POSTGRES_DB: kernel
+      POSTGRES_USER: kernel
+      POSTGRES_PASSWORD: kernel_dev_only
+      # 提取件与条款文本是英文与中文混排，统一 UTF-8
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
+    ports:
+      - "55432:5432"   # 避开本机可能已占用的 5432
+    volumes:
+      - kernel_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kernel -d kernel"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  kernel_pgdata:

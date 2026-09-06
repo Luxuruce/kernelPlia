@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+.env
+.env.*
+venv/
+.venv/
+
+# 预渲染页图：PDF 的派生物，可由 scripts/render_pages.py 重建
+static/
