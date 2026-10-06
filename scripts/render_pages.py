@@ -23,7 +23,7 @@ import pypdfium2 as pdfium
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
 
-from app.config import CORPUS_ROOT, PAGE_IMAGE_DIR  # noqa: E402
+from app.config import CORPUS_ROOT, IMAGE_EXT, PAGE_IMAGE_DIR  # noqa: E402
 from ingest.corpus import CorpusChanged, verify_corpus  # noqa: E402
 
 # source_id → PDF 相对 CORPUS_ROOT 的路径。
@@ -35,9 +35,19 @@ SOURCE_PDF = {
     "dec_2026_429": "04_授权与实施法案/01_授权决定_EU-2026-429_托盘缠绕膜与捆扎带_EN.pdf",
 }
 
-# 渲染倍率。2.0 ≈ 144 dpi，条文正文在普通屏上足够清晰，
-# 单页约 100–200 KB。调它不影响 bbox（归一化坐标）。
+# 渲染倍率。2.0 ≈ 144 dpi，条文正文在普通屏上足够清晰。
+# 调它不影响 bbox（归一化坐标）。
 SCALE = 2.0
+
+# 输出 **无损 WebP**，不是 PNG。
+#
+# 这几页是渲染出来的文字页、大片纯白，WebP 的无损压缩比 PNG 强得多：
+# 实测同一页同一倍率 **452 KB → 90 KB**，全库 **86 MB → 22 MB**，
+# 而且 `ImageChops.difference` 逐像素比对为 `None`——**一点画质都没损**。
+#
+# 之所以要压：Vercel Hobby 的源文件上传上限是 100 MB，86 MB 的 PNG 贴着线，
+# 加上代码和语料就超了。降分辨率是另一条路，但没必要——无损压缩已经够。
+IMAGE_SAVE = {"format": "WEBP", "lossless": True, "method": 6}   # 后缀见 config.IMAGE_EXT
 
 
 def render(source_id: str, pdf_path: pathlib.Path, force: bool) -> tuple[int, int]:
@@ -50,11 +60,11 @@ def render(source_id: str, pdf_path: pathlib.Path, force: bool) -> tuple[int, in
         written = 0
         for i in range(n):
             # 页码按 1 基，与 clause.page_from / bbox 的 page 一致，也与 PDF 显示页码一致
-            target = out_dir / f"p{i + 1}.png"
+            target = out_dir / f"p{i + 1}.{IMAGE_EXT}"
             if target.exists() and not force:
                 continue
             page = doc[i]
-            page.render(scale=SCALE).to_pil().save(target, format="PNG", optimize=True)
+            page.render(scale=SCALE).to_pil().save(target, **IMAGE_SAVE)
             page.close()
             written += 1
         return n, written

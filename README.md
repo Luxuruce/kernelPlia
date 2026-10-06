@@ -160,7 +160,7 @@ Figures below are from the live version, which uses a private full index. This r
 | Recall | On 15 golden cases, recall misses **12 → 3** (~94% expected-citation recall); false blocks **1 → 0** |
 | Invented clause numbers | **0** from the candidate models under the real nested schema |
 | Latency and cost | ~**11.5 s** end to end, ~**¥0.004** (≈ US$0.0006) per question |
-| Tests | **148** automated tests in the live version; **34** offline tests here (no model needed) |
+| Tests | **191** automated tests in the live version; **35** offline tests here (no model needed) |
 | Operations | Per-IP daily limit; monthly budget alert at 70%, degrade at 100%; model fallback lite → pro → clause list only |
 
 ---
@@ -205,7 +205,7 @@ docker compose up -d                      # PostgreSQL 16
 pip install -r requirements.txt
 python scripts/init_db.py
 python -m ingest.load                     # load demo_index/
-pytest -q                                 # 34 tests, no model needed
+pytest -q                                 # 35 tests, no model needed
 uvicorn app.api:app --reload              # http://127.0.0.1:8000
 ```
 
@@ -239,7 +239,7 @@ demo_index/   demo slice of 10 clause units + conflicts, links, stopwords, golde
 scripts/      setup, diagnostics (why.py), model gate tests
 tools/        demo slice export
 web/          single-page front end
-tests/        34 offline tests
+tests/        35 offline tests
 ```
 
 </details>

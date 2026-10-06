@@ -28,6 +28,8 @@ CONFLICT_FIELDS = ("id", "clause_ids", "summary_zh", "resolution_zh", "authority
                    "trigger_clause_ids", "trigger_context_terms")
 CASE_FIELDS = ("id", "type", "q", "expect_clauses", "expect_conflict_ids",
                "expect_next_action")
+STOP_FIELDS = ("term", "why")
+NEVER_STOP_FIELDS = ("term", "reason")
 
 #: 明确**不出去**的字段，写在这里只为可读——真正拦住它们的是上面的白名单。
 NEVER = ("notes", "text_zh", "adopted_by", "forbid", "expect_behavior", "is_inference")
@@ -122,21 +124,37 @@ def main() -> None:
     # status / adopted_by 由导出器统一标注：**演示切片不冒充具名采纳**。
     # 库里有 clause_adopted_requires_signature_ck——采纳必须有署名与时间，
     # 这条约束在演示切片上照样成立，所以这里如实写「非真实采纳记录」。
+    # 日期取首次导出那天：条款没变就沿用上一版的日期，不然每发布一次公开仓
+    # 就平白多出十处改动，真正的内容变化反而被淹掉。
     import datetime as _dt
+    prev_f = OUT / "clauses.demo.yaml"
+    prev = {}
+    if prev_f.exists():
+        for p in (yaml.safe_load(prev_f.read_text(encoding="utf-8")) or {}).get("clauses") or []:
+            prev[p["id"]] = p
+    today = _dt.date.today().isoformat()
     for c in clauses:
         c["status"] = "adopted"
         c["adopted_by"] = "演示切片（非真实采纳记录）"
-        c["adopted_at"] = _dt.date.today().isoformat()
+        p = prev.get(c["id"])
+        same = p and {k: v for k, v in p.items() if k != "adopted_at"} == c
+        c["adopted_at"] = p["adopted_at"] if same else today
     dump("clauses.demo.yaml", {"clauses": clauses})
     dump("links.yaml", {"links": links})
     dump("conflicts.yaml", {"conflicts": confs})
     dump("golden_cases.yaml", {"cases": cases})
     # 停用词表整份带走：它是**机制**（人工维护的「idf」，不随语料增长自动漂），
     # 里面没有条款判断，正是 该项裁决 想公开的那一类东西。
+    # 条目也走白名单（2026-10-06，仓库迁移方案第 6.3 节 该项裁决）：`evidence` 是逐用例的实测记录，
+    # 引了未导出用例的提问原文与切片外条款 id，等于把用例集带出去。运行时只读 `term`。
     stop = yaml.safe_load((K / "stopwords.yaml").read_text(encoding="utf-8"))
-    dump("stopwords.yaml", {k: stop[k] for k in ("meta", "rule", "stopwords_zh",
-                                                 "stopwords_en", "never_stopword")
-                            if k in stop})
+    entry = {"stopwords_zh": STOP_FIELDS, "stopwords_en": STOP_FIELDS,
+             "never_stopword": NEVER_STOP_FIELDS}
+    out = {k: stop[k] for k in ("meta", "rule") if k in stop}
+    for k, fields in entry.items():
+        if k in stop:
+            out[k] = [pick(w, fields) for w in stop[k] or []]
+    dump("stopwords.yaml", out)
     print(f"条款 {len(clauses)} · 链接 {len(links)} · 冲突 {len(confs)} · 用例 {len(cases)} → {OUT}")
 
 

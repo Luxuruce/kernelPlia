@@ -26,7 +26,7 @@ def test_长词权重更高():
 def test_虚词按词判定不按字():
     """按首尾**字**剪会误伤领域词——「可回收性」「可重复使用」都以 `可` 开头。"""
     assert "可" in BOUNDARY_STOP           # 它确实是虚词字
-    assert "可回收性" in extract_terms("可回收性怎么分 A、B、C 级？")
+    assert "可回收性" in extract_terms("可回收性的评级标准是什么？")
     assert extract_terms("这是什么？怎么样？多少？") == {}
 
 

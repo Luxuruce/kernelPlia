@@ -1,4 +1,8 @@
-"""引用怎么呈现给用户。**一个字都不自己发明**——格式与位阶文案都是照抄的。"""
+"""引用怎么呈现给用户。**一个字都不自己发明**——格式与位阶文案都是照抄的。
+
+只用演示切片里有的条款 id；项、附件、表这几种形态的样例在 `tests/full/test_display_full.py`
+（那几条是切片外的真实条款，公开仓不发布，仓库迁移方案第 6.3 节）。
+"""
 
 from __future__ import annotations
 
@@ -9,11 +13,7 @@ from app.display import authority_note, display
 
 @pytest.mark.parametrize("cid,want", [
     ("ppwr/art/5/4", "第 5(4) 条"),
-    ("ppwr/art/5/5/c", "第 5(5)(c) 条"),
-    ("ppwr/art/71", "第 71 条"),
-    ("ppwr/annex/VII/2", "附件 VII 第 2 点"),
-    ("ppwr/annex/II/table3", "附件 II 表 3"),
-    ("ppwr/annex/IX/B/1", "附件 IX B 部分第 1 点"),
+    ("ppwr/art/70/3", "第 70(3) 条"),
     ("ppwr_guidance/sec/19", "指南第 19 节"),
     ("ppwr_faq/ch/III/q/17", "FAQ 第 III 章问 17"),
     ("dec_2026_429/art/1", "Delegated Decision (EU) 2026/429 第 1 条"),

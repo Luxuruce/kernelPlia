@@ -19,7 +19,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from app.answer import ask
-from app.config import PAGE_IMAGE_DIR, PAGE_IMAGE_URL_PREFIX, settings
+from app.config import IMAGE_EXT, PAGE_IMAGE_DIR, PAGE_IMAGE_URL_PREFIX, settings
 from app.context import assemble, estimate_tokens, fit_to_budget
 from app.coverage import coverage_scope_zh
 from app.db import connect
@@ -64,16 +64,28 @@ def index():
 
 # 页图静态托管。**运行时不做渲染**（产品契约文档 第二节）——
 # 232 页由 scripts/render_pages.py 一次性预渲染好。
-PAGE_IMAGE_DIR.mkdir(parents=True, exist_ok=True)
-app.mount(
-    PAGE_IMAGE_URL_PREFIX,
-    StaticFiles(directory=PAGE_IMAGE_DIR),
-    name="page_images",
-)
+#
+# **不要在模块级无条件 mkdir。** serverless 上除 /tmp 外文件系统只读，
+# 目录不存在时这一行会抛 OSError，而它在 import 期执行——
+# 整个函数起不来，表现为 500 FUNCTION_INVOCATION_FAILED，日志里也看不出是页图的事。
+# 同理 StaticFiles(directory=...) 目录不存在时直接抛。
+#
+# 所以：本地没有就建（开发方便），建不了就跳过挂载（云上页图本来也走 CDN）。
+try:
+    PAGE_IMAGE_DIR.mkdir(parents=True, exist_ok=True)
+except OSError:
+    pass
+
+if PAGE_IMAGE_DIR.is_dir():
+    app.mount(
+        PAGE_IMAGE_URL_PREFIX,
+        StaticFiles(directory=PAGE_IMAGE_DIR),
+        name="page_images",
+    )
 
 
 def page_image_urls(source_id: str, page_from: int | None, page_to: int | None) -> list[str]:
-    """按页序给出预渲染页图的 URL。命名规则 {source_id}/p{page}.png。
+    """按页序给出预渲染页图的 URL。命名规则 {source_id}/p{page}.webp。
 
     只列**实际存在**的页图：`04_dec_2026_429` 有 PDF 所以有页图，
     但没有 bbox 边车——那是两回事，前端降级的是高亮框不是页图。
@@ -82,8 +94,8 @@ def page_image_urls(source_id: str, page_from: int | None, page_to: int | None) 
         return []
     urls = []
     for p in range(page_from, (page_to or page_from) + 1):
-        if (PAGE_IMAGE_DIR / source_id / f"p{p}.png").exists():
-            urls.append(f"{PAGE_IMAGE_URL_PREFIX}/{source_id}/p{p}.png")
+        if (PAGE_IMAGE_DIR / source_id / f"p{p}.{IMAGE_EXT}").exists():
+            urls.append(f"{PAGE_IMAGE_URL_PREFIX}/{source_id}/p{p}.{IMAGE_EXT}")
     return urls
 
 

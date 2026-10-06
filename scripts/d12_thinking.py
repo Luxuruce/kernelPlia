@@ -38,7 +38,7 @@ from app.db import connect
 from app.limits import cost_cny
 from app.providers import make_client
 
-OUT = pathlib.Path(__file__).resolve().parent.parent / "d12_thinking.json"
+OUT = pathlib.Path(__file__).resolve().parent.parent / "DEV_NOTES" / "d12_thinking.json"
 
 
 def load_cases() -> list[dict]:

@@ -5,7 +5,7 @@
 （产研边界约定第 5 节：改动用户可见的输出必须回产品审核）。」
 
 所以本模块只做搬运与占位符填充，一个字都不自己写。
-`tests/test_answer.py` 有回归比对关键句，改字会红。
+`tests/full/test_answer.py` 有回归比对关键句，改字会红。
 """
 
 from __future__ import annotations

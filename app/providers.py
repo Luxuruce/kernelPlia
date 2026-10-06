@@ -16,10 +16,10 @@ import os
 from dataclasses import dataclass
 from typing import Any
 
-from app.config import settings
+from app.config import env, settings
 
 # 火山方舟 Responses API。端点与鉴权见控制台「快速开始」。
-ARK_BASE_URL = os.getenv("ARK_BASE_URL", "https://ark.cn-beijing.volces.com/api/v3")
+ARK_BASE_URL = env("ARK_BASE_URL", "https://ark.cn-beijing.volces.com/api/v3")
 
 
 class ProviderError(Exception):
@@ -107,7 +107,7 @@ class ArkClient:
     def __init__(self, api_key: str | None = None, base_url: str = ARK_BASE_URL):
         import openai
 
-        key = api_key or os.getenv("ARK_API_KEY")
+        key = api_key or env("ARK_API_KEY")
         if not key:
             raise ProviderError("no_credentials", "未设置 ARK_API_KEY")
         self._inner = openai.OpenAI(api_key=key, base_url=base_url)
@@ -116,7 +116,7 @@ class ArkClient:
 
 def make_client(provider: str | None = None):
     """按 `LLM_PROVIDER` 造客户端。默认 anthropic，与技术栈定稿一致。"""
-    provider = (provider or os.getenv("LLM_PROVIDER", "anthropic")).lower()
+    provider = (provider or env("LLM_PROVIDER", "anthropic")).lower()
 
     if provider == "ark":
         return ArkClient()

@@ -52,8 +52,6 @@
      不做成 fixed 条——fixed 会在面板滑出时压在上面，而且它属于这一屏的构图。 */
   .src{margin-top:30px;display:flex;flex-wrap:wrap;align-items:center;
     justify-content:center;gap:9px;max-width:760px}
-  .src .lb{width:100%;text-align:center;color:#6b7590;font-size:11.5px;
-    letter-spacing:.06em;margin-bottom:3px}
   .src a,.src span.s{display:inline-flex;align-items:center;gap:7px;
     padding:7px 13px;border-radius:9px;font-size:12.5px;text-decoration:none;
     border:1px solid var(--line);background:#0f122099;color:var(--dim);
@@ -607,8 +605,7 @@ async function openClause(id){
 fetch('/api/sources').then(r => r.json()).then(d => {
   const short = {ppwr_reg:'PPWR 法规原文', dec_2026_429:'授权决定 2026/429',
                  ppwr_guidance:'官方实施指南', ppwr_faq:'官方 FAQ（第二版）'};
-  $('#src').innerHTML = '<div class="lb">本内核依据的官方文件 · 以英文原文为准</div>'
-    + d.sources.map(s => {
+  $('#src').innerHTML = d.sources.map(s => {
         const dot = `<i class="r r${s.authority_rank <= 2 ? 1 : 3}"></i>`;
         const name = esc(short[s.id] || s.id);
         const tip = esc(`${s.title}　|　${s.oj_ref}　|　${s.authority_note}`);

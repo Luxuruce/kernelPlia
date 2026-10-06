@@ -171,7 +171,7 @@ kernelPlia 要回答的是：**某项制度在某时点、对某主体、就某�
 | 召回 | 15 条黄金用例上，召回缺口 **12 → 3**（期望引用召回约 94%），误阻断 **1 → 0** |
 | 编造条款号 | 真实嵌套 schema 下，候选模型编造条款号 **0 次** |
 | 延迟与成本 | 端到端约 **11.5 s**，每问约 **¥0.004** |
-| 测试 | 线上版 **148** 项自动化测试；本仓库 **34** 项离线测试（不需要模型） |
+| 测试 | 线上版 **191** 项自动化测试；本仓库 **35** 项离线测试（不需要模型） |
 | 运维 | 每 IP 每日限流，月预算 70% 告警、100% 降级；模型回退链 lite → pro → 只出条款清单 |
 
 ---
@@ -216,7 +216,7 @@ docker compose up -d                      # PostgreSQL 16
 pip install -r requirements.txt
 python scripts/init_db.py
 python -m ingest.load                     # 装载 demo_index/
-pytest -q                                 # 34 项，不需要模型
+pytest -q                                 # 35 项，不需要模型
 uvicorn app.api:app --reload              # http://127.0.0.1:8000
 ```
 
@@ -255,7 +255,7 @@ demo_index/   10 条条款单元的演示切片 + 冲突、链接、停用词、
 scripts/      初始化、诊断（why.py）、模型闸门测试
 tools/        演示切片导出
 web/          前端单页
-tests/        34 项离线测试
+tests/        35 项离线测试
 ```
 
 </details>

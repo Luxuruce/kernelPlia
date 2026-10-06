@@ -24,12 +24,14 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
 import psycopg  # noqa: E402
 
 from app.answer import SYSTEM_PROMPT, Answer, build_messages  # noqa: E402
-from app.config import settings  # noqa: E402
+from app.config import ROOT, settings  # noqa: E402
 from app.context import assemble, budget_report, estimate_tokens, fit_to_budget  # noqa: E402
 from openai.lib._parsing._responses import type_to_text_format_param  # noqa: E402
 
 from app.providers import ArkClient  # noqa: E402
 from app.retrieval import retrieve  # noqa: E402
+
+DEV_NOTES = ROOT / "DEV_NOTES"           # 实测明细落这里，与报告放一起
 
 MODELS = ["doubao-seed-2-1-pro-260628", "doubao-seed-2-0-lite-260428"]
 PRICING = {"doubao-seed-2-1-pro-260628": (6.0, 30.0),
@@ -123,9 +125,9 @@ def main() -> int:
             c = m["in_tokens"]*pin/1e6 + (m["out_tokens"] or 0)*pout/1e6
             print(f"  {m['model']:<30} {m['config']:<8} ¥{c:.3f}")
 
-    pathlib.Path("gate_ark_latency.json").write_text(
+    (DEV_NOTES / "gate_ark_latency.json").write_text(
         json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
-    print("\n明细已写入 kernel/gate_ark_latency.json")
+    print("\n明细已写入 DEV_NOTES/gate_ark_latency.json")
     return 0
 
 

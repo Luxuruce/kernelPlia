@@ -9,7 +9,7 @@ meta:
     不是规范断言，不走红线第 2 条的具名采纳流程；但改动同样须回归（见第 5 节）。
 
     '
-  consumed_by: kernel/app/terms.py（提问侧候选词生成）
+  consumed_by: app/terms.py（提问侧候选词生成）
   depends_on:
     trigger_threshold: 10.0
     field_weights:
@@ -44,84 +44,41 @@ stopwords_zh:
     因此不携带任何区分信息。
 
     '
-  evidence: '命中 13 / 164 个已采纳单元。在 `ppwr_guidance/sec/16` 的 text_zh 里得
-
-    4^1.2 × 2.0 = **10.56 分，正好越过 10.0 闸门**，于是**任何写了 PPWR 的提问
-
-    都会被 C1 的第 67(5) 条 XPS 适用日冲突拦下**。
-
-    G10「我们做的是速冻食品包装袋，要不要做 PPWR？」的 10.56 分就是这么来的。
-
-    同一个数在 `clauses.support.yaml` 第 393 行有记载——加固前 C1 在 G03 上也是 10.56，
-
-    「命中它的词只有一个——译文里的 PPWR 四个字母」。
-
-    '
-  expected_effect: 'C1 在 G10 上的自足分数由 10.56 降至 5 分以下（不再有 4 字命中）；
-
-    **G03 不受影响**——它靠的是加固后 heading 里的「什么时候」，15.83 分。
-
-    '
 - term: 本条例
   why: 法规对自身的代称，等价于 PPWR。
-  evidence: 命中 33 / 164 个单元（20%），横跨全部议题。heading 出现时 3^1.2 × 3.0 = 11.21，越闸。
 - term: 该条例
   why: 同上，另一种代称。
-  evidence: 命中 1 / 164。text_zh 权重下 7.47 分，越不过闸门；收录是为口径一致。
 - term: 包装法
   why: 中文语境里对 PPWR 最常见的俗称，用户提问高频、语料零区分度。
-  evidence: 当前语料 0 命中——**这条现在是空转的**。
 - term: 包装法规
   why: 同上。
-  evidence: 当前语料 0 命中。
 - term: 欧盟包装法
   why: 同上。
-  evidence: 当前语料 0 命中。
 stopwords_en:
 - term: packaging
   why: 整个语料的主题词，也是每一条的样板语，不独占任何议题。
-  evidence: 命中 23 / 30 个可回填单元（77%）。9^1.2 × 1.5 = **20.95 分，两倍于闸门**。
 - term: Packaging
   why: 同上，句首形态。
-  evidence: 命中 3 / 30。20.95 分。
 - term: Article
   why: 纯引用样板语。每一条互引都写它，指向的条号才是信息。
-  evidence: 命中 24 / 30（80%）。7^1.2 × 1.5 = 15.50 分。
 - term: Regulation
   why: 指代整部法规本身。
-  evidence: 命中 13 / 30（43%）。10^1.2 × 1.5 = 23.77 分。
 - term: regulation
   why: 同上，小写形态。
-  evidence: 命中 1 / 30。23.77 分。
 - term: Commission
   why: 文件署名方，出现在几乎所有指南与 FAQ 单元，不指向任何议题。
-  evidence: 命中 14 / 30（47%）。23.77 分。
 never_stopword:
 - term: 重复使用
-  hit: 25/164 (15%)
-  score: 15.8
   reason: 第 29 条重复使用目标的主题词，也是 **C2 阻断**的依据。停用即漏阻断。
 - term: 可回收
-  hit: 18/164 (11%)
-  score: 11.2
   reason: 第 6 条与附件 II 的主题词。
 - term: 重金属
-  hit: 7/164 (4%)
-  score: 11.2
   reason: 第 5(4) 条主题词，第 5 条问答的核心入口。
 - term: 一次性塑料
-  hit: 4/164 (2%)
-  score: 20.7
   reason: '**C1 的议题词**，指向第 67(5) 条与 SUPD。'
 - term: 包装
-  hit: 近乎全部
-  score: 4.59
   reason: 领域主词，参与几乎所有有区分度的复合词（食品包装、运输包装、复合包装）。整词命中才丢的规则下，它单独出现只贡献一层平坦底噪，越不过闸门，**不值得为此冒漏召的风险**。
 - term: Directive
-  hit: 4/30 (13%)
-  score: 20.9
   reason: 指令与条例的区分是 C1 的实质内容，**有区分度**。
 - term: manufacturer
-  hit: 9/30 (30%)
-  score: 29.6
   reason: 第 15 条制造商义务是两条义务链之一，是我们要打的差异点。频次高但强区分。

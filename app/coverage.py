@@ -7,7 +7,7 @@
 怎么生成是实现细节，但**生成结果必须满足第 7 节的四条产品约束**：
 
   一、只数 `status = 'adopted'`——草稿不构成覆盖，说了就是对用户虚报；
-  二、**部分覆盖的条不得整条声明**（见 PARTIAL_ARTICLES）；
+  二、**部分覆盖的条不得整条声明**（见 `coverage.yaml` 的 `partial_articles`）；
   三、附件按登记粒度如实说；
   四、与 `corpus_version` 绑定，**不得缓存成常量**。
 
@@ -17,32 +17,34 @@
 
 from __future__ import annotations
 
+import yaml
+
 from app.config import KNOWLEDGE_DIR
 
-#: 只登记了部分款的条：**要么不列入覆盖声明，要么写明只覆盖哪几款**。
+#: 覆盖范围的两处限定，放索引目录的 `coverage.yaml`，**不写死在代码里**。
 #:
+#: 一是它们是索引侧的事实、随采纳进度变；二是代码要原样发布到公开仓，
+#: 写进源码就等于把「我们覆盖到哪儿」印在公开代码上（演示切片带自己的一份）。
+#:
+#: `partial_articles`：只登记了部分款的条，**要么不列入覆盖声明，要么写明只覆盖哪几款**。
 #: 它们进索引是因为别的单元指向了它们，不是因为我们覆盖了那条。
-#: 清单正本在 `copy_disclaimer.md` 第 7 节的表格里，这里是镜像——
+#: 清单正本在 `copy_disclaimer.md` 第 7 节的表格里，`coverage.yaml` 是镜像——
 #: **`tests/test_coverage.py` 会拿那份文档交叉核对，漂了就红**。
-#: 产品侧新采纳一批之后，若有新的部分覆盖条，改文档即可，测试会提醒开发同步。
-#: 部分覆盖的条：只登记了个别款，**不得整条声明**。
 #:
-#: **不写死在代码里**——它是索引侧的事实、随采纳进度变，写进源码等于把
-#: 「我们覆盖到哪儿」印在代码上。放索引目录的 `coverage.yaml`，缺文件即空集。
-def _partial_articles() -> dict[str, str]:
-    import yaml
-
-    f = KNOWLEDGE_DIR / "coverage.yaml"
-    if not f.exists():
-        return {}
-    doc = yaml.safe_load(f.read_text(encoding="utf-8")) or {}
-    return {str(k): str(v) for k, v in (doc.get("partial_articles") or {}).items()}
+#: `annex_caveats`：附件的登记粒度限定（第七节第三条：按登记粒度如实说）。
+#:
+#: **缺文件不得当空集。** 空集的意思是「没有部分覆盖的条」，于是第 29 条会被整条声明——
+#: 正是第 7 节点名的那种虚报。所以缺文件直接抛，宁可范围外那一路报错。
+COVERAGE_FILE = KNOWLEDGE_DIR / "coverage.yaml"
 
 
-PARTIAL_ARTICLES = _partial_articles()
-
-#: 附件的登记粒度限定（第七节第三条：按登记粒度如实说）。
-ANNEX_CAVEATS: dict[str, str] = {}     # 同上，由 coverage.yaml 提供
+def _load_coverage() -> tuple[dict[str, str], dict[str, str]]:
+    if not COVERAGE_FILE.is_file():
+        raise FileNotFoundError(
+            f"缺 {COVERAGE_FILE}：部分覆盖清单不可得时不能生成覆盖声明（copy_disclaimer.md 第 7 节）")
+    doc = yaml.safe_load(COVERAGE_FILE.read_text(encoding="utf-8")) or {}
+    pick = lambda k: {str(a): str(b) for a, b in (doc.get(k) or {}).items()}  # noqa: E731
+    return pick("partial_articles"), pick("annex_caveats")
 
 
 def _fmt_articles(nums: list[str]) -> str:
@@ -66,6 +68,7 @@ def coverage_scope_zh(conn) -> str:
 
     每次调用都重算——第四条约束要求它与 `corpus_version` 绑定，不得缓存成常量。
     """
+    PARTIAL_ARTICLES, ANNEX_CAVEATS = _load_coverage()
     rows = conn.execute(
         """
         select c.source_id, c.path_article, c.annex, count(*)

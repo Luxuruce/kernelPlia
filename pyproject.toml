@@ -1,0 +1,32 @@
+# Vercel 的 Python 构建**优先读这份文件**，不是 requirements.txt。
+# 上一版这里只有 [tool.vercel]，结果依赖一个都没装——所以依赖清单必须在这儿。
+
+[project]
+name = "kernelplia"
+version = "0.1.0"
+description = "条款级法规问答内核"
+requires-python = ">=3.12"
+
+# **只列运行时真正 import 的东西。**
+# 预渲染页图用的 pypdfium2 与 Pillow 不在这里：232 页页图是提交进仓的产物，
+# 运行时一次都不会用到，装进函数包只是白占体积。要重渲页图在本地装。
+dependencies = [
+  "fastapi",
+  "psycopg[binary]",      # 纯二进制轮子，云上不需要编译 libpq
+  "pydantic",
+  "openai",               # 火山方舟兼容 OpenAI SDK，只换 base_url（见 app/providers.py）
+  "python-dotenv",
+  "jieba",                # 中文分词（app/terms.py），纯 Python、离线词典
+  "PyYAML",
+]
+
+[tool.uv]
+# 这个仓是**被当作应用跑**，不是要装成一个包。不声明的话 uv 会去找构建后端、
+# 试图把它 build & install，然后因为没有 backend 而失败。
+package = false
+
+# Vercel 的 FastAPI 预设默认只在 app.py / index.py / server.py / main.py /
+# wsgi.py / asgi.py（以及 src/、app/ 下的同名文件）里找名为 app 的 FastAPI 实例。
+# 我们的应用在 app/api.py——**不在那张名单里**，所以必须显式指出入口。
+[tool.vercel]
+entrypoint = "app.api:app"

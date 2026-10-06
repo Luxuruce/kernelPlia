@@ -1,6 +1,6 @@
 """把 knowledge/ppwr/ 的 YAML 装进库。
 
-内容正本是 `businessSYETEM/knowledge/ppwr/`（产品侧维护，开发侧只读）；
+内容正本是 `knowledge/ppwr/`（产品侧维护，开发侧只读）；
 库里的数据是它的**派生物**，所以本脚本是全量重载：先清空四张表再灌，
 不做增量合并——增量会让库和正本悄悄分叉，而正本才是可审计的那一份。
 
@@ -72,11 +72,16 @@ class Report:
         self.warnings.append(msg)
 
 
-def read_yaml(name: str) -> dict:
-    """索引目录里的一份 YAML。**缺文件按空处理**——演示切片没有署名断言
-    （那是具名专家判断，不随代码公开），少了它不该让装载失败。"""
+def read_yaml(name: str, *, optional: bool = False) -> dict:
+    """索引目录里的一份 YAML。
+
+    只有 `optional=True` 的缺文件按空处理——演示切片没有署名断言（那是具名专家判断，
+    不随代码公开），少了它不该让装载失败。**其余缺文件照常抛**：完整索引少了
+    `links.yaml` 若也按空装载，一跳扩展会悄悄全部失效。"""
     f = KNOWLEDGE_DIR / name
-    return yaml.safe_load(f.read_text(encoding="utf-8")) if f.exists() else {}
+    if optional and not f.exists():
+        return {}
+    return yaml.safe_load(f.read_text(encoding="utf-8"))
 
 
 # ---------------------------------------------------------------------------
@@ -100,17 +105,19 @@ def build_clause(entry: dict, defaults: dict, rep: Report) -> dict | None:
         src.pop(k, None)
     line_from, line_to = src.get("line_from"), src.get("line_to")
 
-    override = entry.get("text_en_override") or entry.get("text_en")
+    override = entry.get("text_en_override")
     text_en, bbox = None, None
 
-    # 演示切片把 text_en 直接写在 YAML 里（欧盟公报原文本就公开），
-    # 所以没有语料提取件也能装载；真实索引仍按行号从提取件取，那才是唯一正本。
-    if override and not (CORPUS_DIR.exists() and line_from):
+    if override:
         # 契约补正第 5 项：提取件有缺陷时用人工原文。全批仅 PFAS 定义段一处。
         text_en = override.strip()
         if line_from and line_to and CORPUS_DIR.exists():
-            # 没有坐标边车就没有高亮框——前端按契约降级为只给页码，不报错。
             bbox = bbox_from_lines(source_id, line_from, line_to)
+    elif entry.get("text_en") and not CORPUS_DIR.exists():
+        # 演示切片把 text_en 直接写在 YAML 里（欧盟公报原文本就公开），
+        # 所以没有语料提取件也能装载；没有坐标边车就没有高亮框，前端按契约降级为只给页码。
+        # **有提取件时一律按行号取**——提取件才是唯一正本，内联的那份不作数。
+        text_en = entry["text_en"].strip()
     elif line_from and line_to:
         ext = load_extract(source_id)
         if line_to > ext.n_lines:
@@ -326,7 +333,7 @@ def collect(rep: Report):
                 row["_batch"] = name
                 clauses.append(row)
 
-    doc = read_yaml(ASSERTION_FILE)
+    doc = read_yaml(ASSERTION_FILE, optional=True)
     for entry in doc.get("assertions") or []:
         row = build_assertion(entry, rep)
         if row:
@@ -406,9 +413,9 @@ def main() -> int:
     # 只会让每一条引用悄悄指错地方（MANIFEST.md 第 2 节）。
     try:
         if not CORPUS_DIR.exists():
-            # 没有语料提取件 = 走演示切片那条路（text_en 内联）。
-            # **哈希校验只在没有语料时跳过，不是取消**——行号是条款单元的锚，
-            # 语料一漂引用就会悄悄指错地方，那道闸门必须在。
+            # 没有语料提取件 = 演示切片那条路（text_en 内联）。
+            # **哈希校验只在没有语料时跳过，不是取消**——完整索引按行号取正文，
+            # 没有提取件时每一条都会报「没有 text_en」，装载照样失败。
             print(f"未找到语料提取件（{CORPUS_DIR}），按内联 text_en 装载")
             n_files = 0
         else:

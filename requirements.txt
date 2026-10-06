@@ -1,5 +1,5 @@
 # 合规内核 V0 依赖
-# 技术栈定稿见 V0_开发交接包 第一节。新增依赖若引入服务组件，须回产品审核。
+# 技术栈定稿见 产品契约文档 第一节。新增依赖若引入服务组件，须回产品审核。
 
 fastapi
 uvicorn[standard]
@@ -14,8 +14,8 @@ python-dotenv
 # 靠 heading 权重把无关条款顶进命中集，进而误触发冲突闸门。
 jieba
 
-# 引用可视化（T9）：pdfplumber 取坐标、pypdfium2 预渲染页图。
-# 提取脚本本身在 knowledge/ppwr/EUoffical/_text_clean/extract.py，属内容正本，不在 kernel/ 内。
+# 引用可视化（该任务）：pdfplumber 取坐标、pypdfium2 预渲染页图。
+# 提取脚本本身在 knowledge/ppwr/EUoffical/_text_clean/extract.py，属内容正本，不在代码目录内。
 pypdfium2
 Pillow             # pypdfium2 存 PNG 用它
 

@@ -1,10 +1,10 @@
 -- K1 语料与权利登记 · V0 四份来源
 --
--- 对应任务：V0_执行规划 T6（K1 最小形态）
+-- 对应任务：V0_验收标准文档 该任务（K1 最小形态）
 -- 元数据一律取自 knowledge/ppwr/EUoffical/_text_clean/ 的提取件正文，不凭记忆填写。
 -- ELI 只登记原文中出现的自身 ELI：指南与 FAQ 正文未给出自身 ELI，留空，不编造。
 --
--- rights_status：交接包 第二节明确 V0 四份来源均为欧盟公开法源，登记后置为 ALLOW。
+-- rights_status：产品契约文档 第二节明确 V0 四份来源均为欧盟公开法源，登记后置为 ALLOW。
 -- 字段与判断必须存在——第二簇接入标准类内容时默认 RIGHTS_BLOCKED（决策 #8）。
 
 insert into source (id, title, instrument_class, authority_rank,

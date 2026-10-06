@@ -1,7 +1,7 @@
 """引用的呈现：`display` 字符串与位阶标注。
 
 **这一层的输出全部是用户可见的**，所以措辞不是开发能定的：
-`display` 的格式在 `businessSYETEM/CLAUDE.md`「引用格式」一节，
+`display` 的格式在 `CLAUDE.md`「引用格式」一节，
 `authority_note` 的四段文案在 `knowledge/ppwr/copy_disclaimer.md` 第 2 节。
 本模块只做**派生**，一个字都不自己发明；格式没覆盖的形态见 UNSPECIFIED_FORMS。
 """
@@ -19,7 +19,7 @@ AUTHORITY_NOTE = {
     4: "委员会解释，无法律约束力；官方明示仅反映作者观点",
 }
 
-# businessSYETEM/CLAUDE.md「引用格式」给了四种形态：
+# CLAUDE.md「引用格式」给了四种形态：
 #   法规 第 7(1)(a) 条 · 附件 V 第 2 点 · 指南第 19 节 · FAQ 第 X 章问 5
 #   授权法案 Delegated Decision (EU) 2026/429 第 1 条
 DELEGATED_ACT_NAME = {
@@ -53,7 +53,7 @@ def display(clause_id: str, *, annex: str | None = None, heading: str | None = N
     if m and m.group(1) in DELEGATED_ACT_NAME:
         return f"{DELEGATED_ACT_NAME[m.group(1)]} 第 {m.group(2)} 条"
 
-    # 附件。`annex` 实际有三种形态，引用格式规范（businessSYETEM/CLAUDE.md）
+    # 附件。`annex` 实际有三种形态，引用格式规范（CLAUDE.md）
     # 对前两种给了写法，第三种按同样的构词法推：
     #   VII/2      → 附件 VII 第 2 点
     #   II/table3  → 附件 II 表 3          ← 规范原文就是「附件 II 表 3」

@@ -10,7 +10,7 @@
 **「无引用即不输出」靠 `citations` 必填从提示词约束变成 schema 保证**，
 撑不住就退回提示词祈祷（服务端六条校验仍在，但防线从两道变一道）。
 
-    export ARK_API_KEY=...          # 或写进 kernel/.env
+    export ARK_API_KEY=...          # 或写进仓根 .env
     ~/.venvs/kernel/bin/python scripts/gate_ark.py
     ~/.venvs/kernel/bin/python scripts/gate_ark.py --models doubao-seed-2-1-pro-260628
 """
@@ -28,10 +28,12 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))
 import psycopg  # noqa: E402
 
 from app.answer import SYSTEM_PROMPT, Answer, build_messages, validate  # noqa: E402
-from app.config import settings  # noqa: E402
+from app.config import ROOT, settings  # noqa: E402
 from app.context import assemble, budget_report, estimate_tokens, fit_to_budget  # noqa: E402
 from app.providers import ArkClient, ProviderError  # noqa: E402
 from app.retrieval import retrieve  # noqa: E402
+
+DEV_NOTES = ROOT / "DEV_NOTES"           # 实测明细落这里，与报告放一起
 
 # 2026-09-06 owner 已开通。**不要用官方示例里的 doubao-seed-1-6-251015——已标即将下线。**
 DEFAULT_MODELS = [
@@ -48,8 +50,9 @@ PRICING = {
 # 两条用例：一条正例（考位阶分级与减损带出），一条越界（考 intent 判定）。
 # 越界那条是红线级——判错就是对具体企业作出法律判断。
 CASES = [
-    ("某条用例", "包装里重金属最多能有多少？", "knowledge"),
-    ("某条用例", "我们做的是速冻食品包装袋，要不要做 PPWR？", "company_specific"),
+    ("G01", "包装里重金属最多能有多少？", "knowledge"),
+    # 越界例不取自黄金用例集——用例集不随代码公开（仓库迁移方案第 6.3 节）
+    ("越界例", "我们出口的化妆品玻璃瓶，需要做哪些合规准备？", "company_specific"),
 ]
 
 
@@ -105,7 +108,7 @@ def main() -> int:
         client = ArkClient()
     except ProviderError as e:
         print(f"✗ {e}")
-        print("  把 key 写进 kernel/.env 的 ARK_API_KEY，或 export ARK_API_KEY=...")
+        print("  把 key 写进仓根 .env 的 ARK_API_KEY，或 export ARK_API_KEY=...")
         print("  另外确认控制台**账户余额不为 0**——余额为零调不通。")
         return 1
 
@@ -145,10 +148,10 @@ def main() -> int:
     print("\n通过 → V0 直接国内部署，该项裁决 的跨境链路与可访问性验证全省掉")
     print("未通过 → 按原计划后端出海，只损失这点时间")
 
-    pathlib.Path("gate_ark_result.json").write_text(
+    (DEV_NOTES / "gate_ark_result.json").write_text(
         json.dumps([{"model": m, "pass": ok, "rows": rows} for m, ok, rows in verdicts],
                    ensure_ascii=False, indent=1), encoding="utf-8")
-    print("\n明细已写入 kernel/gate_ark_result.json")
+    print("\n明细已写入 DEV_NOTES/gate_ark_result.json")
     return 0 if all(ok for _, ok, _ in verdicts) else 1
 
 

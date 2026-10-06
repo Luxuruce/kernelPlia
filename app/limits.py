@@ -14,17 +14,18 @@
 from __future__ import annotations
 
 import datetime as dt
-import os
 from dataclasses import dataclass
+
+from app.config import env_float, env_int
 
 #: 每 IP 每日问答次数。5 次的依据（产品契约文档 第六节）：真实用户的好奇心驱动 3–10 次够用；
 #: 5 次能把一次百人级传播的消耗压在 500 问内。
-DAILY_LIMIT = int(os.getenv("DAILY_LIMIT_PER_IP", "5"))
+DAILY_LIMIT = env_int("DAILY_LIMIT_PER_IP", 5)
 
 #: 月度预算（元）。**产品把口径定成金额、没有给数**——
 #: 这个默认值是从他们推导每日 5 次时用的「每天约 ¥20」反推的（¥20 × 30 = ¥600）。
 #: 产品契约文档 待办表里「充值额度定下来后回来复核」那条同时管这两个数。
-MONTHLY_BUDGET_CNY = float(os.getenv("MONTHLY_BUDGET_CNY", "600"))
+MONTHLY_BUDGET_CNY = env_float("MONTHLY_BUDGET_CNY", 600)
 
 WARN_AT = 0.70          # 告警，通知人，给充值留时间
 DEGRADE_AT = 1.00       # 超限降级：只出第一段，不调模型
